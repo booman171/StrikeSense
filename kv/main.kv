@@ -1,0 +1,43 @@
+<MainScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            id: display
+            font_size: dp(50)
+            text: 'StrikeSense'
+            
+        ActivityButton:
+            text: "Choose Activity"
+            font_size: 40
+            size_hint_y: 0.4
+            on_release: root.manager.current = 'activities'
+            
+        Label:
+            id: sensors
+            font_size: dp(50)
+            text: '0 Devices'
+            
+        TextInput:
+            id: mac_input
+            size_hint_y: 0.2
+            
+        Button:
+            id: register
+            text: "Enter Mac Address"
+            size_hint_y: 0.4
+            on_press: root.register()    
+        
+            
+<ActivitiesScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        Button:
+            id: test_accel
+            text: 'test accel'
+        Label:
+            id: accel
+            font_size: dp(50)
+            text: 'accel'
+        Button:
+            text: 'Back to menu'
+            on_press: root.manager.current = 'main'
