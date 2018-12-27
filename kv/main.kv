@@ -19,6 +19,7 @@
             
         TextInput:
             id: mac_input
+            focus: True
             size_hint_y: 0.2
             
         Button:
@@ -29,15 +30,28 @@
         
             
 <ActivitiesScreen>:
+    id: activities
     BoxLayout:
         orientation: "vertical"
         Button:
             id: test_accel
             text: 'test accel'
+            on_release: root.testAccel()
         Label:
             id: accel
             font_size: dp(50)
-            text: 'accel'
+            text: "accel"
         Button:
             text: 'Back to menu'
             on_press: root.manager.current = 'main'
+            
+<AccelScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            id: accel2
+            font_size: dp(50)
+            text: "accel"
+        Button:
+            text: 'Back to activities'
+            on_press: root.manager.current = 'activities'
