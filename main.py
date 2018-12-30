@@ -28,6 +28,7 @@ from client import MetaWearClient
 
 from threading import Event
 from time import sleep
+import time
 from threading import Event
 from os import listdir
 import signal
@@ -77,9 +78,6 @@ class State():
         
 class MainScreen(Screen):
     acceleration = StringProperty("fhfjh")
-    #display = ObjectProperty()
-    sensors = ObjectProperty()
-    textinput = TextInput(text='Hello world')
     b = BoxLayout()
     t = TextInput()
     f = FloatLayout()
@@ -88,15 +86,18 @@ class MainScreen(Screen):
     c = None
     z = None
     message = None
-    #b.add_widget(display)
-    #b.add_widget(sensors)
     message = Label(text="StrikeSense", pos=(50, 200 ), font_size='50sp')
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
         self.add_widget(MainScreen.message)
+        self.add_widget(MainScreen.button1)
+    
+    def set_button(self):
+        MainScreen.button1 = Button(text='Hello world 1', pos=(0, 100),size_hint = (.4,.2))
 
-
-
+    def reposition_button(root, *args):
+        b1.pos = root.x, root.height / 2 - b1.height / 2
+    
     def enter_mac(self):
         self.display.text = "Scanning"
         MacInput()
@@ -107,46 +108,6 @@ class MainScreen(Screen):
     
     def register(self):
         global mac
-        self.ids.display.text = str("fhffffffffffffffffffffffffffedfghf")
-        mac = self.ids.mac_input.text
-#D7:88:89:11:EC:DC
-        print('User pressed enter in', mac)
-        #global c
-        MainScreen.c = MetaWearClient(str(mac), debug=True)
-
-#        device = MetaWear(mac)
-#        device.connect()
-#        connected = True
-        print("Connected")
-        pattern = MainScreen.c.led.load_preset_pattern('blink')
-        MainScreen.c.led.write_pattern(pattern, 'g')
-        MainScreen.c.led.play()
-        
-        def mwc_acc_cb(data):
-            x = data['value'].x
-            y = data['value'].y
-            MainScreen.z = data['value'].z
-            self.ids.display.text = str(MainScreen.z)
-            print("z-axis: ", MainScreen.z)
-            
-        print("Check accelerometer settings...")
-        #global c
-        settings = MainScreen.c.accelerometer.get_current_settings()
-        print(settings)
-        MainScreen.c.accelerometer.high_frequency_stream = False
-        print("Subscribing to accelerometer signal notifications...")
-        MainScreen.c.accelerometer.notifications(lambda data: mwc_acc_cb(data))
-        #val = str(self.sensors.text)
-        #self.sensors.text = str(0)
-#        if connected:
-#            self.ids.sensors.text = str("Connected")
-#        pattern= LedPattern(repeat_count= Const.LED_REPEAT_INDEFINITELY)
-#        libmetawear.mbl_mw_led_load_preset_pattern(byref(pattern), LedPreset.SOLID)
-#        libmetawear.mbl_mw_led_write_pattern(device.board, byref(pattern), LedColor.GREEN)
-#        libmetawear.mbl_mw_led_play(device.board)
-#        global s
-#        s = State(device)
-    def select_device(self):
         """Run `discover_devices` and display a list to select from.
 
         :param int timeout: Duration of scanning.
@@ -156,9 +117,8 @@ class MainScreen(Screen):
         """
         timeout = 3
         MainScreen.acceleration = StringProperty("fghffffffffffffffffffffffffffffffhtf")
-        #self.add_widget(message)
+        time.sleep(1.0)
         print("ghgghDiscovering nearby Bluetooth Low Energy devices...")
-        self.ids.display.text = str("Di")
         ble_devices = discover_devices(timeout=timeout)
         if len(ble_devices) > 1:
             for x in range(0, len(ble_devices)):
@@ -174,9 +134,33 @@ class MainScreen(Screen):
             address = ble_devices[0][0]
             print("Found only one device: {0}: {1}.".format(*ble_devices[0][::-1]))
         else:
-            raise ValueError("Did not detect any BLE devices.")
-        return address
-   
+            #raise ValueError("Did not detect any BLE devices.")
+            print("Did not detect any BLE devices.")
+
+#D7:88:89:11:EC:DC
+        MainScreen.c = MetaWearClient(str(address), debug=True)
+        print("Connected")
+        pattern = MainScreen.c.led.load_preset_pattern('pulse')
+        MainScreen.c.led.write_pattern(pattern, 'b')
+        MainScreen.c.led.play()
+        
+        def mwc_acc_cb(data):
+            x = data['value'].x
+            y = data['value'].y
+            MainScreen.z = data['value'].z
+            #self.ids.display.text = str(MainScreen.z)
+            MainScreen.message.text = str(y)
+            print("z-axis: ", MainScreen.z)
+            
+        print("Check accelerometer settings...")
+        settings = MainScreen.c.accelerometer.get_current_settings()
+        print(settings)
+        MainScreen.c.accelerometer.high_frequency_stream = False
+        print("Subscribing to accelerometer signal notifications...")
+        MainScreen.c.accelerometer.notifications(lambda data: mwc_acc_cb(data))
+    
+
+    button1.bind(on_release=register)
         
 class ActivitiesScreen(Screen):
     

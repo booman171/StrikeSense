@@ -1,32 +1,6 @@
 <MainScreen>:
     BoxLayout:
-        orientation: "vertical"
-        Label:
-            id: display
-            font_size: dp(50)
-            text: "guhg"
-            
-        ActivityButton:
-            text: "Choose Activity"
-            font_size: 40
-            size_hint_y: 0.4
-            on_release: root.manager.current = 'activities'
-            
-        Label:
-            id: sensors
-            font_size: dp(50)
-            text: '0 Devices'
-            
-        TextInput:
-            id: mac_input
-            focus: True
-            size_hint_y: 0.2
-            
-        Button:
-            id: register
-            text: "Discover Device"
-            size_hint_y: 0.4
-            on_press: root.select_device()    
+        orientation: "vertical"   
         
             
 <ActivitiesScreen>:
