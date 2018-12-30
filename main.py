@@ -76,8 +76,8 @@ class State():
         #self.samples+= 1
         
 class MainScreen(Screen):
-    acceleration = StringProperty()
-    display = ObjectProperty()
+    acceleration = StringProperty("fhfjh")
+    #display = ObjectProperty()
     sensors = ObjectProperty()
     textinput = TextInput(text='Hello world')
     b = BoxLayout()
@@ -87,34 +87,15 @@ class MainScreen(Screen):
     b.add_widget(t)
     c = None
     z = None
+    message = None
     #b.add_widget(display)
     #b.add_widget(sensors)
-    def select_device(self):
-        """Run `discover_devices` and display a list to select from.
+    message = Label(text="StrikeSense", pos=(50, 200 ), font_size='50sp')
+    def __init__(self, **kwargs):
+        super(MainScreen, self).__init__(**kwargs)
+        self.add_widget(MainScreen.message)
 
-        :param int timeout: Duration of scanning.
-        :return: The selected device's address.
-        :rtype: str
 
-        """
-        timeout = 3
-        print("Discovering nearby Bluetooth Low Energy devices...")
-        self.ids.display.text = "Discovering nearby Bluetooth Low Energy devices..."
-        ble_devices = discover_devices(timeout=timeout)
-        if len(ble_devices) > 1:
-            for i, d in enumerate(ble_devices):
-                print("[{0}] - {1}: {2}".format(i + 1, *d))
-            s = input("Which device do you want to connect to? ")
-            if int(s) <= (i + 1):
-                address = ble_devices[int(s) - 1][0]
-            else:
-                raise ValueError("Incorrect selection. Aborting...")
-        elif len(ble_devices) == 1:
-            address = ble_devices[0][0]
-            print("Found only one device: {0}: {1}.".format(*ble_devices[0][::-1]))
-        else:
-            raise ValueError("Did not detect any BLE devices.")
-        return address
 
     def enter_mac(self):
         self.display.text = "Scanning"
@@ -126,7 +107,7 @@ class MainScreen(Screen):
     
     def register(self):
         global mac
-        
+        self.ids.display.text = str("fhffffffffffffffffffffffffffedfghf")
         mac = self.ids.mac_input.text
 #D7:88:89:11:EC:DC
         print('User pressed enter in', mac)
@@ -165,7 +146,36 @@ class MainScreen(Screen):
 #        libmetawear.mbl_mw_led_play(device.board)
 #        global s
 #        s = State(device)
+    def select_device(self):
+        """Run `discover_devices` and display a list to select from.
 
+        :param int timeout: Duration of scanning.
+        :return: The selected device's address.
+        :rtype: str
+
+        """
+        timeout = 3
+        MainScreen.acceleration = StringProperty("fghffffffffffffffffffffffffffffffhtf")
+        #self.add_widget(message)
+        print("ghgghDiscovering nearby Bluetooth Low Energy devices...")
+        self.ids.display.text = str("Di")
+        ble_devices = discover_devices(timeout=timeout)
+        if len(ble_devices) > 1:
+            for x in range(0, len(ble_devices)):
+                print("ggg", ble_devices[x][0])
+#            for i, d in enumerate(ble_devices):
+#                print("[{0}] - {1}: {2}".format(i + 1, *d))
+#            s = input("Which device do you want to connect to? ")
+#            if int(s) <= (i + 1):
+#                address = ble_devices[int(s) - 1][0]
+#            else:
+#                raise ValueError("Incorrect selection. Aborting...")
+        elif len(ble_devices) == 1:
+            address = ble_devices[0][0]
+            print("Found only one device: {0}: {1}.".format(*ble_devices[0][::-1]))
+        else:
+            raise ValueError("Did not detect any BLE devices.")
+        return address
    
         
 class ActivitiesScreen(Screen):
