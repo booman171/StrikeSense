@@ -37,7 +37,7 @@ import platform
 import os
 import main2
 import operator
-
+import csv
 #import PyKDL as kdl
 #os.environ['KIVY_GL_BACKEND'] = 'gl'
 #import sys
@@ -45,67 +45,9 @@ import operator
 kv_path = './kv/'
 for kv in listdir(kv_path):
     Builder.load_file(kv_path+kv)
-
-class ActivityButton(Button):
-    pass
-
-class SubtractButton(Button):
-    pass
-
-class MacInput(BoxLayout):
-    pass
-    
-class State():
-    #accelX = StringProperty('0')
-    def __init__(self, device):
-        self.device = device
-        self.samples = 0
-        self.callback = FnVoid_VoidP_DataP(self.data_handler)
-        self.accelX = StringProperty()
-        #print(self.accelX)
-    def data_handler(self, ctx, data):
-        #print("%s -> %s" % (self.device.address, parse_value(data).x))
-        #accelX = 3
-#        self.accelX = StringProperty(parse_value(data).x)
-#        global val
-#        val = self.accelX
-        game = Label(text='fff')
-        ActivitiesScreen().updateAccel(game)
-        #.updateAccel(parse_value(data).x)
-        #ActivitiesScreen.val
-        #print(val)
-        #self.samples+= 1
         
 class MainScreen(Screen):
-    acceleration = StringProperty("fhfjh")
-    b = BoxLayout()
-    t = TextInput()
-    f = FloatLayout()
-    b.add_widget(f)
-    b.add_widget(t)
-    c = None
-    z = None
-    message = None
-    message = Label(text="StrikeSense", pos=(50, 200 ), font_size='50sp')
-    def __init__(self, **kwargs):
-        super(MainScreen, self).__init__(**kwargs)
-        self.add_widget(MainScreen.message)
-        self.add_widget(MainScreen.button1)
-    
-    def set_button(self):
-        MainScreen.button1 = Button(text='Hello world 1', pos=(0, 100),size_hint = (.4,.2))
-
-    def reposition_button(root, *args):
-        b1.pos = root.x, root.height / 2 - b1.height / 2
-    
-    def enter_mac(self):
-        self.display.text = "Scanning"
-        MacInput()
         
-    def add_device(self):
-        value = int(self.display.text)
-        self.display.text = str(value+1)
-    
     def register(self):
         global mac
         """Run `discover_devices` and display a list to select from.
@@ -120,9 +62,14 @@ class MainScreen(Screen):
         time.sleep(1.0)
         print("ghgghDiscovering nearby Bluetooth Low Energy devices...")
         ble_devices = discover_devices(timeout=timeout)
-        if len(ble_devices) > 1:
+        oneConnected = False
+        if len(ble_devices) > 1 & oneConnected == False:
             for x in range(0, len(ble_devices)):
-                print("ggg", ble_devices[x][0])
+                print("ggg", ble_devices[x][1])
+                if ble_devices[x][1] == "MetaWear":
+                    address = ble_devices[x][0]
+                    print("connecting to: ", ble_devices[x][0])
+                    oneConnected = True
 #            for i, d in enumerate(ble_devices):
 #                print("[{0}] - {1}: {2}".format(i + 1, *d))
 #            s = input("Which device do you want to connect to? ")
@@ -137,67 +84,93 @@ class MainScreen(Screen):
             #raise ValueError("Did not detect any BLE devices.")
             print("Did not detect any BLE devices.")
 
-#D7:88:89:11:EC:DC
+        #D7:88:89:11:EC:DC
         MainScreen.c = MetaWearClient(str(address), debug=True)
         print("Connected")
         pattern = MainScreen.c.led.load_preset_pattern('pulse')
         MainScreen.c.led.write_pattern(pattern, 'b')
         MainScreen.c.led.play()
         
+    
         def mwc_acc_cb(data):
             x = data['value'].x
             y = data['value'].y
-            MainScreen.z = data['value'].z
-            #self.ids.display.text = str(MainScreen.z)
-            MainScreen.message.text = str(y)
-            print("z-axis: ", MainScreen.z)
+            z = data['value'].z
             
+            row = "this," + str(x)
+            
+            MainScreen.dataList.append(x)
+            
+            activity = ""
+            #print(MainScreen.dataList)
+            if len(MainScreen.dataList) >= 2:
+                for i in MainScreen.dataList:
+                    MainScreen.count += 1
+                    elapsed = time.time() - start
+                    if elapsed >= 0 and elapsed < 5:
+                        activity = "Jogging"
+                    elif elapsed >= 5 and elapsed <= 10:
+                        activity = "Knee Kicks"
+                    else:
+                        activity = "Free"
+                        
+                    f.write(activity + "," + str(elapsed) + "," + str(i))
+                    f.write("\n")
+                    
+                    print(elapsed)
+                    MainScreen.message.text = activity
+                    
+                    
+                    #f.write("\n")#Give your csv text here.
+            ## Python will convert \n to os.linesep
+            #f.close()
+                
+            #MainScreen.message2.text = str("Accel: ") + str(y)
+            #file.close()
         print("Check accelerometer settings...")
         settings = MainScreen.c.accelerometer.get_current_settings()
         print(settings)
         MainScreen.c.accelerometer.high_frequency_stream = False
         print("Subscribing to accelerometer signal notifications...")
+        MainScreen.button1.text = str("Start")
+        start = time.time()
+        f = open('csvfile.csv','w')
+
         MainScreen.c.accelerometer.notifications(lambda data: mwc_acc_cb(data))
-    
-
-    button1.bind(on_release=register)
         
-class ActivitiesScreen(Screen):
-    
-    def updateAccel(accelX):
-        return accelX#self.ids.accel.text = str(accelX)
-    
-    
+    acceleration = StringProperty("fhfjh")
+    b = BoxLayout()
+    t = TextInput()
+    f = FloatLayout()
+    b.add_widget(f)
+    b.add_widget(t)
+    c = None
+    message = Label(text="StrikeSense")#, pos=(50, 200 ), font_size='50sp')
+    message2 = Label(text="message2")#, pos=(50, 200 ), font_size='50sp')
+    button1 = Button(text='Hello world 1')
+    file = open('csvfile.csv','w')
+    #file.write('hi there\n') #Give your csv text here.
+    ## Python will convert \n to os.linesep
+    #f.close()
+    dataList = []
+    count = 0
+    def __init__(self, **kwargs):
+        super(MainScreen, self).__init__(**kwargs)
+        MainScreen.button1 = Button(text='Connect', pos=(self.x, self.y),size_hint = (1,.2))
+        MainScreen.message = Label(text="StrikeSense", pos=(self.x, self.height * .75), font_size='50sp')
+        MainScreen.message2 = Label(text="message2", pos=(self.x, self.y), font_size='50sp')
+        MainScreen.button1.bind(on_release=MainScreen.register)
+        self.add_widget(MainScreen.message)
+        self.add_widget(MainScreen.message2)
+        self.add_widget(MainScreen.button1)
 
-    def testAccel(self):
-        print("Z: ", MainScreen.z)
     
-class AccelScreen(Screen):
-    #global val
-    #print("rthr", val)
-    def updateAccel():
-        self.ids.accel.text = str(accelX)
+    
+    
+    
         
 sm = ScreenManager()
 sm.add_widget(MainScreen(name='main'))
-sm.add_widget(ActivitiesScreen(name='activities'))
-sm.add_widget(AccelScreen(name='accelView'))
-def handle_acc_notification(data):
-            # Handle dictionary with [epoch, value] keys.
-            #epoch = data["epoch"]
-            #xyz = data["value"]
-            #print("This: ", str(data))
-            #time.sleep(1.0)
-            global x
-            x = data['value'].x
-            #self.ids.accel.text = acceleration
-            #y = data['value'].y
-            #z = data['value'].z
-def getDevice(mac):
-    print("Mac: ", mac)
-    
-def getX():
-    print("Accel: ", accelX)
     
 class MainApp(App):
     
