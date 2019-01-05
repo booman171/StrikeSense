@@ -107,9 +107,9 @@ class MainScreen(Screen):
                 for i in MainScreen.dataList:
                     MainScreen.count += 1
                     elapsed = time.time() - start
-                    if elapsed >= 0 and elapsed < 5:
+                    if elapsed >= 0 and elapsed < 300:
                         activity = "Jogging"
-                    elif elapsed >= 5 and elapsed <= 10:
+                    elif elapsed >= 300 and elapsed <= 420:
                         activity = "Knee Kicks"
                     else:
                         activity = "Free"
@@ -137,6 +137,8 @@ class MainScreen(Screen):
         f = open('csvfile.csv','w')
 
         MainScreen.c.accelerometer.notifications(lambda data: mwc_acc_cb(data))
+        
+        print("dghdf")
         
     acceleration = StringProperty("fhfjh")
     b = BoxLayout()
