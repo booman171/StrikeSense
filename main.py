@@ -47,7 +47,15 @@ for kv in listdir(kv_path):
     Builder.load_file(kv_path+kv)
         
 class MainScreen(Screen):
-        
+    def onPause(self):
+        MainScreen.paused = not MainScreen.paused
+        if MainScreen.paused == True:
+            print("Unpasued: ", MainScreen.paused)
+            MainScreen.button2.text = str("Pause")
+        elif MainScreen.paused == False:
+            print("Paused: ", MainScreen.paused)
+            MainScreen.button2.text = str("Resume")
+            
     def register(self):
         global mac
         """Run `discover_devices` and display a list to select from.
@@ -98,73 +106,73 @@ class MainScreen(Screen):
             z = data['value'].z
             
             row = "this," + str(x)
-            
-            MainScreen.dataList.append(x)
-            
-            activity = ""
-            #print(MainScreen.dataList)
-            if len(MainScreen.dataList) >= 2:
-                for i in MainScreen.dataList:
-                    MainScreen.count += 1
-                    elapsed = time.time() - start
-                    if elapsed >= 0 and elapsed < 300:
-                        activity = "Jogging"
-                    elif elapsed >= 300 and elapsed <= 420:
-                        activity = "Sprint"
-                    elif elapsed >= 420 and elapsed <= 720:
-                        activity = "Hammer Curls"
-                    elif elapsed >= 720 and elapsed <= 1020:
-                        activity = "Squats"
-                    elif elapsed >= 1020 and elapsed <= 1140:
-                        activity = "Foot Fires"
-                    elif elapsed >= 1140 and elapsed <= 1440:
-                        activity = "Bentover Rows"
-                    elif elapsed >= 1440 and elapsed <= 1740:
-                        activity = "Squat Hold"
-                    elif elapsed >= 1740 and elapsed <= 1860:
-                        activity = "Jogging"
-                    elif elapsed >= 1860 and elapsed <= 2160:
-                        activity = "Shoulder Press"
-                    elif elapsed >= 2160 and elapsed <= 2280:
-                        activity = "Sprint"
-                    elif elapsed >= 2280 and elapsed <= 2580:
-                        activity = "Jab, Duck, Hook"
-                    elif elapsed >= 2580 and elapsed <= 2880:
-                        activity = "Foot Fires"
-                    elif elapsed >= 2880 and elapsed <= 3180:
-                        activity = "Elbow, Cross"
-                    elif elapsed >= 3180 and elapsed <= 3300:
-                        activity = "Jogging"
-                    elif elapsed >= 3300 and elapsed <= 3600:
-                        activity = "Hooks"
-                    else:
-                        activity = "Rest"
-                        
-                    f.write(activity + "," + str(elapsed) + "," + str(i))
-                    f.write("\n")
-                    
-                    print(elapsed)
-                    MainScreen.message.text = activity
-                    
-                    
-                    #f.write("\n")#Give your csv text here.
-            ## Python will convert \n to os.linesep
-            #f.close()
+            now = time.time()
+            if MainScreen.paused == False:
+                MainScreen.dataList.append(x)
                 
-            #MainScreen.message2.text = str("Accel: ") + str(y)
-            #file.close()
+                activity = ""
+                #print(MainScreen.dataList)
+                if len(MainScreen.dataList) >= 2:
+                    for i in MainScreen.dataList:
+                        MainScreen.count += 1
+                        elapsed = (time.time() - start) - MainScreen.restTime
+                        MainScreen.pausedTime = (time.time() - start) - MainScreen.restTime
+
+                        if elapsed >= 0 and elapsed < 300:
+                            activity = "Jogging"
+                        elif elapsed >= 300 and elapsed <= 420:
+                            activity = "Sprint"
+                        elif elapsed >= 420 and elapsed <= 720:
+                            activity = "Hammer Curls"
+                        elif elapsed >= 720 and elapsed <= 1020:
+                            activity = "Squats"
+                        elif elapsed >= 1020 and elapsed <= 1140:
+                            activity = "Foot Fires"
+                        elif elapsed >= 1140 and elapsed <= 1440:
+                            activity = "Bentover Rows"
+                        elif elapsed >= 1440 and elapsed <= 1740:
+                            activity = "Squat Hold"
+                        elif elapsed >= 1740 and elapsed <= 1860:
+                            activity = "Jogging"
+                        elif elapsed >= 1860 and elapsed <= 2160:
+                            activity = "Shoulder Press"
+                        elif elapsed >= 2160 and elapsed <= 2280:
+                            activity = "Sprint"
+                        elif elapsed >= 2280 and elapsed <= 2580:
+                            activity = "Jab, Duck, Hook"
+                        elif elapsed >= 2580 and elapsed <= 2880:
+                            activity = "Foot Fires"
+                        elif elapsed >= 2880 and elapsed <= 3180:
+                            activity = "Elbow, Cross"
+                        elif elapsed >= 3180 and elapsed <= 3300:
+                            activity = "Jogging"
+                        elif elapsed >= 3300 and elapsed <= 3600:
+                            activity = "Hooks"
+                        else:
+                            activity = "Rest"
+                            
+                        f.write(activity + "," + str(elapsed) + "," + str(i))
+                        f.write("\n")
+                        print("Elapsed: " + str(elapsed))
+                        MainScreen.message.text = activity
+            else:
+                MainScreen.restTime = MainScreen.pausedTime
+                #print("this: ", str(MainScreen.restTime))
         print("Check accelerometer settings...")
         settings = MainScreen.c.accelerometer.get_current_settings()
         print(settings)
         MainScreen.c.accelerometer.high_frequency_stream = False
         print("Subscribing to accelerometer signal notifications...")
-        MainScreen.button1.text = str("Start")
+        MainScreen.button1.y = 5000
+        MainScreen.button2.y = MainScreen.sizeY
+        #MainScreen.button1.bind(on_release=MainScreen.onPause)
+        
         start = time.time()
+        elapsed = 0
         f = open('csvfile.csv','w')
-
+        
         MainScreen.c.accelerometer.notifications(lambda data: mwc_acc_cb(data))
         
-        print("dghdf")
         
     acceleration = StringProperty("fhfjh")
     b = BoxLayout()
@@ -176,21 +184,32 @@ class MainScreen(Screen):
     message = Label(text="StrikeSense")#, pos=(50, 200 ), font_size='50sp')
     message2 = Label(text="message2")#, pos=(50, 200 ), font_size='50sp')
     button1 = Button(text='Hello world 1')
+    button2 = Button(text='Hello world 1')
+    
+    sizeY = 0
+    sizex = 0
     file = open('csvfile.csv','w')
-    #file.write('hi there\n') #Give your csv text here.
-    ## Python will convert \n to os.linesep
-    #f.close()
     dataList = []
     count = 0
+    paused = False
+    restTime = 0
+    pausedTime = 0
+    now = 0
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
+        MainScreen.sizeY = self.y
+        MainScreen.sizeX = self.x
         MainScreen.button1 = Button(text='Connect', pos=(self.x, self.y),size_hint = (1,.2))
+        MainScreen.button2 = Button(text='Start', pos=(self.x, 5000),size_hint = (1,.2))
         MainScreen.message = Label(text="StrikeSense", pos=(self.x, self.height * .75), font_size='50sp')
         MainScreen.message2 = Label(text="message2", pos=(self.x, self.y), font_size='50sp')
         MainScreen.button1.bind(on_release=MainScreen.register)
+        MainScreen.button2.bind(on_release=MainScreen.onPause)
         self.add_widget(MainScreen.message)
         self.add_widget(MainScreen.message2)
         self.add_widget(MainScreen.button1)
+        self.add_widget(MainScreen.button2)
+
 
     
     
