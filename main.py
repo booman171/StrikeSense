@@ -110,9 +110,35 @@ class MainScreen(Screen):
                     if elapsed >= 0 and elapsed < 300:
                         activity = "Jogging"
                     elif elapsed >= 300 and elapsed <= 420:
-                        activity = "Knee Kicks"
+                        activity = "Sprint"
+                    elif elapsed >= 420 and elapsed <= 720:
+                        activity = "Hammer Curls"
+                    elif elapsed >= 720 and elapsed <= 1020:
+                        activity = "Squats"
+                    elif elapsed >= 1020 and elapsed <= 1140:
+                        activity = "Foot Fires"
+                    elif elapsed >= 1140 and elapsed <= 1440:
+                        activity = "Bentover Rows"
+                    elif elapsed >= 1440 and elapsed <= 1740:
+                        activity = "Squat Hold"
+                    elif elapsed >= 1740 and elapsed <= 1860:
+                        activity = "Jogging"
+                    elif elapsed >= 1860 and elapsed <= 2160:
+                        activity = "Shoulder Press"
+                    elif elapsed >= 2160 and elapsed <= 2280:
+                        activity = "Sprint"
+                    elif elapsed >= 2280 and elapsed <= 2580:
+                        activity = "Jab, Duck, Hook"
+                    elif elapsed >= 2580 and elapsed <= 2880:
+                        activity = "Foot Fires"
+                    elif elapsed >= 2880 and elapsed <= 3180:
+                        activity = "Elbow, Cross"
+                    elif elapsed >= 3180 and elapsed <= 3300:
+                        activity = "Jogging"
+                    elif elapsed >= 3300 and elapsed <= 3600:
+                        activity = "Hooks"
                     else:
-                        activity = "Free"
+                        activity = "Rest"
                         
                     f.write(activity + "," + str(elapsed) + "," + str(i))
                     f.write("\n")
