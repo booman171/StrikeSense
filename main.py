@@ -38,6 +38,8 @@ import os
 import main2
 import operator
 import csv
+from datetime import datetime, timedelta
+
 #import PyKDL as kdl
 #os.environ['KIVY_GL_BACKEND'] = 'gl'
 #import sys
@@ -47,14 +49,85 @@ for kv in listdir(kv_path):
     Builder.load_file(kv_path+kv)
         
 class MainScreen(Screen):
-    def onPause(self):
-        MainScreen.paused = not MainScreen.paused
-        if MainScreen.paused == True:
-            print("Unpasued: ", MainScreen.paused)
-            MainScreen.button2.text = str("Pause")
-        elif MainScreen.paused == False:
-            print("Paused: ", MainScreen.paused)
-            MainScreen.button2.text = str("Resume")
+    stop_watch_start = False
+    seconds = 3600
+    
+    
+        
+    acceleration = StringProperty("fhfjh")
+    b = BoxLayout()
+    t = TextInput()
+    f = FloatLayout()
+    b.add_widget(f)
+    b.add_widget(t)
+    c = None
+    message = Label(text="StrikeSense")#, pos=(50, 200 ), font_size='50sp')
+    message2 = Label(text="message2")#, pos=(50, 200 ), font_size='50sp')
+    button1 = Button(text='Hello world 1')
+    button2 = Button(text='Hello world 1')
+    
+    sizeY = 0
+    sizex = 0
+    file = open('csvfile.csv','w')
+    dataList = []
+    count = 0
+    paused = False
+    restTime = 0
+    pausedTime = 0
+    now = 0
+    def __init__(self, **kwargs):
+        super(MainScreen, self).__init__(**kwargs)
+        self.title = 'StrikeSense'
+        now = datetime.now()
+        self.wait_time = datetime(now.year, now.month, now.day, hour=0, minute=0, second=0)
+        self.wait_time = self.wait_time + timedelta(seconds=self.seconds)
+        
+        MainScreen.sizeY = self.y
+        MainScreen.sizeX = self.x
+        MainScreen.button1 = Button(text='Connect', pos=(self.x, self.y),size_hint = (1,.2))
+        MainScreen.button2 = Button(text='Start', pos=(self.x, 5000),size_hint = (1,.2))
+        MainScreen.message = Label(text="StrikeSense", pos=(self.x, self.height * .75), font_size='50sp')
+        MainScreen.message2 = Label(text="message2", pos=(self.x, self.y), font_size='50sp')
+        MainScreen.button1.bind(on_release=MainScreen.register)
+        MainScreen.button2.bind(on_release=MainScreen.onPause)
+        self.add_widget(MainScreen.message)
+        self.add_widget(MainScreen.message2)
+        self.add_widget(MainScreen.button1)
+        self.add_widget(MainScreen.button2)
+
+    def build(self):
+        self.root.ids.time.text = '{}'.format(self.wait_time.time().strftime("%M:%S"))
+
+    def update_time(self, seconds):
+        if self.stop_watch_start:
+            self.wait_time -= timedelta(seconds=1)
+
+        self.root.ids.time.text = '{}'.format(self.wait_time.time().strftime("%M:%S"))
+        print(self.wait_time.time().strftime("%M:%S"))
+        
+    def start_stop(self):
+        if self.stop_watch_start:
+            self.stop_watch_start = False
+            self.root.ids.bt_start_stop.text = 'Start'
+            Clock.unschedule(self.update_time)
+        else:
+            self.stop_watch_start = True
+            self.root.ids.bt_start_stop.text = 'Stop'
+            Clock.schedule_interval(self.update_time, 1)
+
+    def reset(self):
+
+        if self.stop_watch_start:
+            self.root.ids.bt_start_stop.text = 'Start'
+            self.stop_watch_start = False
+
+        now = datetime.now()
+        self.wait_time = datetime(now.year, now.month, now.day, hour=0, minute=0, second=0)
+        self.wait_time = self.wait_time + timedelta(seconds=180)
+
+        self.root.ids.time.text = '{}'.format(
+            self.wait_time.time().strftime("%M:%S"))
+        
             
     def register(self):
         global mac
@@ -156,8 +229,8 @@ class MainScreen(Screen):
                         print("Elapsed: " + str(elapsed))
                         MainScreen.message.text = activity
             else:
-                MainScreen.restTime = MainScreen.pausedTime
-                #print("this: ", str(MainScreen.restTime))
+                print("this")
+                
         print("Check accelerometer settings...")
         settings = MainScreen.c.accelerometer.get_current_settings()
         print(settings)
@@ -173,45 +246,6 @@ class MainScreen(Screen):
         
         MainScreen.c.accelerometer.notifications(lambda data: mwc_acc_cb(data))
         
-        
-    acceleration = StringProperty("fhfjh")
-    b = BoxLayout()
-    t = TextInput()
-    f = FloatLayout()
-    b.add_widget(f)
-    b.add_widget(t)
-    c = None
-    message = Label(text="StrikeSense")#, pos=(50, 200 ), font_size='50sp')
-    message2 = Label(text="message2")#, pos=(50, 200 ), font_size='50sp')
-    button1 = Button(text='Hello world 1')
-    button2 = Button(text='Hello world 1')
-    
-    sizeY = 0
-    sizex = 0
-    file = open('csvfile.csv','w')
-    dataList = []
-    count = 0
-    paused = False
-    restTime = 0
-    pausedTime = 0
-    now = 0
-    def __init__(self, **kwargs):
-        super(MainScreen, self).__init__(**kwargs)
-        MainScreen.sizeY = self.y
-        MainScreen.sizeX = self.x
-        MainScreen.button1 = Button(text='Connect', pos=(self.x, self.y),size_hint = (1,.2))
-        MainScreen.button2 = Button(text='Start', pos=(self.x, 5000),size_hint = (1,.2))
-        MainScreen.message = Label(text="StrikeSense", pos=(self.x, self.height * .75), font_size='50sp')
-        MainScreen.message2 = Label(text="message2", pos=(self.x, self.y), font_size='50sp')
-        MainScreen.button1.bind(on_release=MainScreen.register)
-        MainScreen.button2.bind(on_release=MainScreen.onPause)
-        self.add_widget(MainScreen.message)
-        self.add_widget(MainScreen.message2)
-        self.add_widget(MainScreen.button1)
-        self.add_widget(MainScreen.button2)
-
-
-    
     
     
     
