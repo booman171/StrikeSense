@@ -51,7 +51,7 @@ for kv in listdir(kv_path):
 class MainScreen(Screen):
     stop_watch_start = False
     seconds = 3600
-    
+    wait_time = None
     
         
     acceleration = StringProperty("fhfjh")
@@ -62,7 +62,8 @@ class MainScreen(Screen):
     b.add_widget(t)
     c = None
     message = Label(text="StrikeSense")#, pos=(50, 200 ), font_size='50sp')
-    message2 = Label(text="message2")#, pos=(50, 200 ), font_size='50sp')
+    message2 = Label(text="message2")#, pos=(50, 200 ), font_size='50sp')\
+    timeLabel = Label(text='[b]00:00[/b]', font_name='./fonts/DSEG7Classic-Regular.ttf', font_size=100, markup=True)
     button1 = Button(text='Hello world 1')
     button2 = Button(text='Hello world 1')
     
@@ -71,7 +72,7 @@ class MainScreen(Screen):
     file = open('csvfile.csv','w')
     dataList = []
     count = 0
-    paused = False
+    paused = True
     restTime = 0
     pausedTime = 0
     now = 0
@@ -79,8 +80,8 @@ class MainScreen(Screen):
         super(MainScreen, self).__init__(**kwargs)
         self.title = 'StrikeSense'
         now = datetime.now()
-        self.wait_time = datetime(now.year, now.month, now.day, hour=0, minute=0, second=0)
-        self.wait_time = self.wait_time + timedelta(seconds=self.seconds)
+        MainScreen.wait_time = datetime(now.year, now.month, now.day, hour=0, minute=0, second=0)
+        MainScreen.wait_time = MainScreen.wait_time + timedelta(seconds=self.seconds)
         
         MainScreen.sizeY = self.y
         MainScreen.sizeX = self.x
@@ -89,44 +90,46 @@ class MainScreen(Screen):
         MainScreen.message = Label(text="StrikeSense", pos=(self.x, self.height * .75), font_size='50sp')
         MainScreen.message2 = Label(text="message2", pos=(self.x, self.y), font_size='50sp')
         MainScreen.button1.bind(on_release=MainScreen.register)
-        MainScreen.button2.bind(on_release=MainScreen.onPause)
+        MainScreen.button2.bind(on_release=MainScreen.start_stop)
         self.add_widget(MainScreen.message)
         self.add_widget(MainScreen.message2)
         self.add_widget(MainScreen.button1)
         self.add_widget(MainScreen.button2)
+        self.add_widget(MainScreen.timeLabel)
 
     def build(self):
-        self.root.ids.time.text = '{}'.format(self.wait_time.time().strftime("%M:%S"))
+        self.root.ids.time.text = '{}'.format(MainScreen.wait_time.time().strftime("%M:%S"))
+        print("ffdgbvfd")
+        
+    def update_time(self):
+        if MainScreen.stop_watch_start:
+            MainScreen.wait_time -= timedelta(seconds=1)
 
-    def update_time(self, seconds):
-        if self.stop_watch_start:
-            self.wait_time -= timedelta(seconds=1)
-
-        self.root.ids.time.text = '{}'.format(self.wait_time.time().strftime("%M:%S"))
-        print(self.wait_time.time().strftime("%M:%S"))
+        MainScreen.timeLabel.text = '{}'.format(MainScreen.wait_time.time().strftime("%M:%S"))
+        print(MainScreen.wait_time.time().strftime("%M:%S"))
         
     def start_stop(self):
-        if self.stop_watch_start:
-            self.stop_watch_start = False
-            self.root.ids.bt_start_stop.text = 'Start'
-            Clock.unschedule(self.update_time)
+        if MainScreen.stop_watch_start:
+            MainScreen.stop_watch_start = False
+            MainScreen.button2.text = 'Start'
+            Clock.unschedule(MainScreen.update_time)
         else:
-            self.stop_watch_start = True
-            self.root.ids.bt_start_stop.text = 'Stop'
-            Clock.schedule_interval(self.update_time, 1)
+            MainScreen.stop_watch_start = True
+            MainScreen.button2.text = 'Stop'
+            Clock.schedule_interval(MainScreen.update_time, 1)
 
     def reset(self):
 
-        if self.stop_watch_start:
-            self.root.ids.bt_start_stop.text = 'Start'
-            self.stop_watch_start = False
+        if MainScreen.stop_watch_start:
+            MainScreen.button2.text = 'Start'
+            MainScreen.stop_watch_start = False
 
         now = datetime.now()
-        self.wait_time = datetime(now.year, now.month, now.day, hour=0, minute=0, second=0)
-        self.wait_time = self.wait_time + timedelta(seconds=180)
+        MainScreen.wait_time = datetime(now.year, now.month, now.day, hour=0, minute=0, second=0)
+        MainScreen.wait_time = MainScreen.wait_time + timedelta(seconds=180)
 
         self.root.ids.time.text = '{}'.format(
-            self.wait_time.time().strftime("%M:%S"))
+            MainScreen.wait_time.time().strftime("%M:%S"))
         
             
     def register(self):
@@ -140,7 +143,6 @@ class MainScreen(Screen):
         """
         timeout = 3
         MainScreen.acceleration = StringProperty("fghffffffffffffffffffffffffffffffhtf")
-        time.sleep(1.0)
         print("ghgghDiscovering nearby Bluetooth Low Energy devices...")
         ble_devices = discover_devices(timeout=timeout)
         oneConnected = False
@@ -180,56 +182,56 @@ class MainScreen(Screen):
             
             row = "this," + str(x)
             now = time.time()
-            if MainScreen.paused == False:
-                MainScreen.dataList.append(x)
-                
-                activity = ""
-                #print(MainScreen.dataList)
-                if len(MainScreen.dataList) >= 2:
-                    for i in MainScreen.dataList:
-                        MainScreen.count += 1
-                        elapsed = (time.time() - start) - MainScreen.restTime
-                        MainScreen.pausedTime = (time.time() - start) - MainScreen.restTime
-
-                        if elapsed >= 0 and elapsed < 300:
-                            activity = "Jogging"
-                        elif elapsed >= 300 and elapsed <= 420:
-                            activity = "Sprint"
-                        elif elapsed >= 420 and elapsed <= 720:
-                            activity = "Hammer Curls"
-                        elif elapsed >= 720 and elapsed <= 1020:
-                            activity = "Squats"
-                        elif elapsed >= 1020 and elapsed <= 1140:
-                            activity = "Foot Fires"
-                        elif elapsed >= 1140 and elapsed <= 1440:
-                            activity = "Bentover Rows"
-                        elif elapsed >= 1440 and elapsed <= 1740:
-                            activity = "Squat Hold"
-                        elif elapsed >= 1740 and elapsed <= 1860:
-                            activity = "Jogging"
-                        elif elapsed >= 1860 and elapsed <= 2160:
-                            activity = "Shoulder Press"
-                        elif elapsed >= 2160 and elapsed <= 2280:
-                            activity = "Sprint"
-                        elif elapsed >= 2280 and elapsed <= 2580:
-                            activity = "Jab, Duck, Hook"
-                        elif elapsed >= 2580 and elapsed <= 2880:
-                            activity = "Foot Fires"
-                        elif elapsed >= 2880 and elapsed <= 3180:
-                            activity = "Elbow, Cross"
-                        elif elapsed >= 3180 and elapsed <= 3300:
-                            activity = "Jogging"
-                        elif elapsed >= 3300 and elapsed <= 3600:
-                            activity = "Hooks"
-                        else:
-                            activity = "Rest"
-                            
-                        f.write(activity + "," + str(elapsed) + "," + str(i))
-                        f.write("\n")
-                        print("Elapsed: " + str(elapsed))
-                        MainScreen.message.text = activity
-            else:
-                print("this")
+#            if MainScreen.stop_watch_start:
+#                MainScreen.dataList.append(x)
+#                
+#                activity = ""
+#                #print(MainScreen.dataList)
+#                if len(MainScreen.dataList) >= 2:
+#                    for i in MainScreen.dataList:
+#                        MainScreen.count += 1
+#                        elapsed = (time.time() - start) - MainScreen.restTime
+#                        MainScreen.pausedTime = (time.time() - start) - MainScreen.restTime
+#
+#                        if elapsed >= 0 and elapsed < 300:
+#                            activity = "Jogging"
+#                        elif elapsed >= 300 and elapsed <= 420:
+#                            activity = "Sprint"
+#                        elif elapsed >= 420 and elapsed <= 720:
+#                            activity = "Hammer Curls"
+#                        elif elapsed >= 720 and elapsed <= 1020:
+#                            activity = "Squats"
+#                        elif elapsed >= 1020 and elapsed <= 1140:
+#                            activity = "Foot Fires"
+#                        elif elapsed >= 1140 and elapsed <= 1440:
+#                            activity = "Bentover Rows"
+#                        elif elapsed >= 1440 and elapsed <= 1740:
+#                            activity = "Squat Hold"
+#                        elif elapsed >= 1740 and elapsed <= 1860:
+#                            activity = "Jogging"
+#                        elif elapsed >= 1860 and elapsed <= 2160:
+#                            activity = "Shoulder Press"
+#                        elif elapsed >= 2160 and elapsed <= 2280:
+#                            activity = "Sprint"
+#                        elif elapsed >= 2280 and elapsed <= 2580:
+#                            activity = "Jab, Duck, Hook"
+#                        elif elapsed >= 2580 and elapsed <= 2880:
+#                            activity = "Foot Fires"
+#                        elif elapsed >= 2880 and elapsed <= 3180:
+#                            activity = "Elbow, Cross"
+#                        elif elapsed >= 3180 and elapsed <= 3300:
+#                            activity = "Jogging"
+#                        elif elapsed >= 3300 and elapsed <= 3600:
+#                            activity = "Hooks"
+#                        else:
+#                            activity = "Rest"
+#                            
+#                        f.write(activity + "," + str(elapsed) + "," + str(i))
+#                        f.write("\n")
+#                        #print("Elapsed: " + str(elapsed))
+#                        MainScreen.message.text = activity
+#            else:
+#                pass
                 
         print("Check accelerometer settings...")
         settings = MainScreen.c.accelerometer.get_current_settings()
