@@ -1,0 +1,25 @@
+BoxLayout:
+    orientation: 'vertical'
+    Label:
+        id: time
+        text: '[b]00:00[/b]'
+        font_name: './fonts/DSEG7Classic-Regular.ttf'
+        font_size: 100
+        markup: True
+        
+    Label:
+        id: activity
+        text: 'StrikeSense'
+        font_size: 50
+        
+    BoxLayout:
+        size_hint_y: 0.2
+        Button:
+            id: bt_start_stop
+            text: 'Connect'
+            on_press: app.register()
+
+        Button:
+            id: bt_reset
+            text: 'Reset'
+            on_press: app.start_stop()
