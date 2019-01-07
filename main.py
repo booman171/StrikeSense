@@ -60,13 +60,14 @@ class MainScreen(App):
     restTime = 0
     pausedTime = 0
     now = 0
+    activity = ""
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
         self.title = 'Rarmen Timer'
         now = datetime.now()
         self.wait_time = datetime(now.year, now.month, now.day, hour=0, minute=0, second=0)
         self.wait_time = self.wait_time + timedelta(seconds=self.seconds)
-
+        
     def build(self):
         self.root.ids.time.text = '{}'.format(
             self.wait_time.time().strftime("%M:%S"))
@@ -158,42 +159,43 @@ class MainScreen(App):
                     if len(MainScreen.dataList) >= 2:
                         for i in MainScreen.dataList:
                             current = self.root.ids.time.text
+                            currentActivity = MainScreen.activity
+                            
                             if current == "29:58":
-                                activity = "Jogging"
+                                MainScreen.activity = "Jogging"
                             elif current == "28:00":
-                                activity = "Sprint"
+                                MainScreen.activity = "Sprint"
                             elif current == "27:00":
-                                activity = "Hammer Curls"
+                                MainScreen.activity = "Hammer Curls"
                             elif current == "25:00":
                                 activity = "Squats"
                             elif current == "22:00":
-                                activity = "Foot Fires"
+                                MainScreen.activity = "Foot Fires"
                             elif current == "21:00":
-                                activity = "Bent-over Rows"
+                                MainScreen.activity = "Bent-over Rows"
                             elif current == "18:00":
-                                activity = "Squat Hold"
+                                MainScreen.activity = "Squat Hold"
                             elif current == "16:00":
-                                activity = "Jogging"
+                                MainScreen.activity = "Jogging"
                             elif current == "13;00":
-                                activity = "Shoulder Press"
+                                MainScreen.activity = "Shoulder Press"
                             elif current == "12:00":
-                                activity = "Sprint"
+                                MainScreen.activity = "Sprint"
                             elif current == "09:00":
-                                activity = "Jab, Duck, Hook"
+                                MainScreen.activity = "Jab, Duck, Hook"
                             elif current == "08:00":
-                                activity = "Foot Fires"
+                                MainScreen.activity = "Foot Fires"
                             elif current == "05:00":
-                                activity = "Elbow, Cross"
+                                MainScreen.activity = "Elbow, Cross"
                             elif current == "04:00":
-                                activity = "Jogging"
+                                MainScreen.activity = "Jogging"
                             elif current == "03:00":
-                                activity = "Hooks"
+                                MainScreen.activity = "Hooks"
                         
-                                
-                            f.write(activity + "," + str(current) + "," + str(i))
+                            f.write(str(current) + "," + str(i))
                             f.write("\n")
-                            print("Elapsed: " + self.root.ids.time.text)
-                            self.root.ids.activity.text = activity
+                            #print("Elapsed: " + self.root.ids.time.text)
+                            self.root.ids.activity.text = MainScreen.activity
                 else:
                     pass
                     
@@ -202,15 +204,19 @@ class MainScreen(App):
             print(settings)
             MainScreen.c.accelerometer.high_frequency_stream = False
             print("Subscribing to accelerometer signal notifications...")
+            self.root.ids.bt_connect.pos = (5000, 5000)
+            self.root.ids.bt_start_stop.pos = (0, 0)
+            self.root.ids.bt_start_stop.x = self.root.width
+            print(self.root.width)
             MainScreen.button1.y = 5000
             MainScreen.button2.y = MainScreen.sizeY
             self.root.ids.bt_start_stop.text = "Start"
             #self.root.ids.bt_start_stop.bind(on_press=self.start_stop)
-            activity = ""
+            
             start = time.time()
             elapsed = 0
             f = open('csvfile.csv','w')
-            
+            MainScreen.c.switch.notifications(lambda data: print(data))
             MainScreen.c.accelerometer.notifications(lambda data: mwc_acc_cb(data))
 if __name__ == '__main__':
     MainScreen().run()

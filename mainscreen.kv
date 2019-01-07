@@ -13,13 +13,18 @@ BoxLayout:
         font_size: 50
         
     BoxLayout:
-        size_hint_y: 0.2
+        size_hint_y: 0.5
+        size_hint_x: 1
+        pos_hint_y: 0
         Button:
-            id: bt_start_stop
+            id: bt_connect
             text: 'Connect'
             on_press: app.register()
-
+            
+    BoxLayout:
+        size_hint_y: 0.5    
         Button:
-            id: bt_reset
+            pos_hint: {'x': 5000, 'y': 5000}
+            id: bt_start_stop
             text: 'Reset'
             on_press: app.start_stop()
